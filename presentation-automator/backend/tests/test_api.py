@@ -71,7 +71,7 @@ def test_generate_endpoint_real():
     # Make the request
     response = client.post(
         "/api/generate",
-        json={"document_text": SAMPLE_TEXT}
+        json={"document_text": SAMPLE_TEXT, "options": {}}
     )
     
     # Verify the response

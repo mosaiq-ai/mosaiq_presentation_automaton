@@ -9,6 +9,7 @@ import asyncio
 import os
 import uuid
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from datetime import datetime
 
 from loguru import logger
 
@@ -30,73 +31,78 @@ class PresentationService:
     
     async def generate_presentation(
         self,
-        document_text: str,
+        text: str,
         options: Optional[Dict[str, Any]] = None,
-        context: Optional[GenerationContext] = None,
         task_id: Optional[str] = None,
-        progress_callback: Optional[Callable[[float, str], None]] = None
+        progress_callback: Optional[Callable[[float, str], None]] = None,
     ) -> Presentation:
         """
         Generate a presentation from document text with context sharing.
         
         Args:
-            document_text: The document text to generate from
-            options: Optional configuration for generation
-            context: Optional context for tracking and sharing data
-            task_id: Optional task ID for tracking progress
+            text: The document text to generate from
+            options: Optional generation options
+            task_id: Optional task ID for progress tracking
             progress_callback: Optional callback for progress updates
             
         Returns:
-            The generated presentation
+            A complete presentation with slides
+            
+        Raises:
+            Exception: If generation fails
         """
-        # Initialize options
-        options = options or {}
-        
-        # Initialize context if not provided
-        if context is None:
-            context = GenerationContext(
-                generation_id=task_id or str(uuid.uuid4()),
-                document_source="text"
-            )
-        
         try:
-            # Report initial progress
+            if options is None:
+                options = {}
+            
+            # Create a context object for sharing data between steps
+            context = GenerationContext()
+            
+            # Process the document to extract sections, bullet points, etc.
             if task_id:
                 update_task_progress(task_id, 0.1, "Processing document")
             if progress_callback:
                 progress_callback(0.1, "Processing document")
             
             # Process the document
-            text, stats = await document_processor.process_document(
-                document_text=document_text,
-                context=context
+            processed_result = await document_processor.process_document(text)
+            sections = processed_result.get("sections", [])
+            
+            # Extract key information
+            if task_id:
+                update_task_progress(task_id, 0.3, "Extracting key information")
+            if progress_callback:
+                progress_callback(0.3, "Extracting key information")
+            
+            # Extract additional information for context
+            extraction_results = await asyncio.gather(
+                content_extractor.extract_bullet_points(text, max_points=20),
+                content_extractor.extract_keywords(text, max_keywords=15),
+                content_extractor.get_document_statistics(text),
             )
             
-            # Extract content elements
+            bullet_points = extraction_results[0]
+            keywords = extraction_results[1]
+            stats = extraction_results[2]
+            
+            # Share extracted data in context
+            context.share_data("document_text", text)
+            context.share_data("sections", sections)
+            context.share_data("bullet_points", bullet_points)
+            context.share_data("keywords", keywords)
+            context.share_data("document_statistics", stats)
+            context.share_data("options", options)
+            
+            # Generate a presentation plan with context sharing
             if task_id:
-                update_task_progress(task_id, 0.2, "Extracting content elements")
+                update_task_progress(task_id, 0.5, "Creating presentation plan")
             if progress_callback:
-                progress_callback(0.2, "Extracting content elements")
-            
-            # Extract sections (structure)
-            sections = await content_extractor.extract_sections(text, context)
-            
-            # Extract bullet points
-            bullet_points = await content_extractor.extract_bullet_points(text, context)
-            
-            # Extract keywords
-            keywords = await content_extractor.extract_keywords(text, max_keywords=15, context=context)
-            
-            # Generate presentation plan with context
-            if task_id:
-                update_task_progress(task_id, 0.4, "Creating presentation plan")
-            if progress_callback:
-                progress_callback(0.4, "Creating presentation plan")
+                progress_callback(0.5, "Creating presentation plan")
             
             # Get the planning agent with context capabilities
             plan_agent = get_planning_agent()
             
-            # Create agent input with processed content
+            # Prepare input for planning agent
             planning_input = {
                 "document_text": text,
                 "sections": sections,
@@ -110,7 +116,7 @@ class PresentationService:
             context.set_stage_status("planning", StageStatus.IN_PROGRESS)
             
             # Create the presentation plan
-            plan = await plan_agent.generate_plan(planning_input, context=context)
+            plan = await plan_agent.create_presentation_plan(planning_input, context=context)
             
             # Store plan in context for later use
             context.share_data("presentation_plan", plan)
@@ -140,142 +146,72 @@ class PresentationService:
                 update_task_progress(task_id, 0.9, "Finalizing presentation")
             if progress_callback:
                 progress_callback(0.9, "Finalizing presentation")
-            
-            # Complete the context
+                
+            # Set final context stage
             context.set_stage_status("content_generation", StageStatus.COMPLETED)
-            context.complete_generation()
-            
-            # Final progress update
-            if task_id:
-                update_task_progress(task_id, 1.0, "Presentation generation complete")
-            if progress_callback:
-                progress_callback(1.0, "Presentation generation complete")
             
             return presentation
-        
         except Exception as e:
-            # Log and record error in context
             logger.error(f"Error generating presentation: {e}")
-            if context:
-                context.stats.record_error("presentation_generation", str(e))
             raise
     
-    @cache(namespace="presentations", expire=3600, cache_type=CacheType.BOTH)
+    @cache(namespace="presentations", expire=3600 * 24 * 7, cache_type=CacheType.BOTH)  # Cache for 1 week
     async def generate_cached_presentation(
         self,
-        document_text: str,
+        text: str,
         options: Optional[Dict[str, Any]] = None,
         task_id: Optional[str] = None,
-        progress_callback: Optional[Callable[[float, str], None]] = None
+        progress_callback: Optional[Callable[[float, str], None]] = None,
     ) -> Presentation:
         """
         Generate a presentation with caching.
         
-        This method wraps generate_presentation with caching for performance.
-        
         Args:
-            document_text: The document text to generate from
-            options: Optional configuration for generation
-            task_id: Optional task ID for tracking progress
+            text: The document text to generate from
+            options: Optional generation options
+            task_id: Optional task ID for progress tracking
             progress_callback: Optional callback for progress updates
             
         Returns:
-            The generated presentation
+            A complete presentation with slides
         """
-        # Create a new context
-        context = GenerationContext(
-            generation_id=task_id or str(uuid.uuid4()),
-            document_source="text"
-        )
-        
         return await self.generate_presentation(
-            document_text=document_text,
+            text=text, 
             options=options,
-            context=context,
-            task_id=task_id,
-            progress_callback=progress_callback
-        )
-    
-    async def generate_from_file(
-        self,
-        file_path: str,
-        options: Optional[Dict[str, Any]] = None,
-        task_id: Optional[str] = None,
-        progress_callback: Optional[Callable[[float, str], None]] = None
-    ) -> Presentation:
-        """
-        Generate a presentation from a file.
-        
-        Args:
-            file_path: Path to the document file
-            options: Optional configuration for generation
-            task_id: Optional task ID for tracking progress
-            progress_callback: Optional callback for progress updates
-            
-        Returns:
-            The generated presentation
-        """
-        # Report initial progress
-        if task_id:
-            update_task_progress(task_id, 0.05, "Reading file")
-        if progress_callback:
-            progress_callback(0.05, "Reading file")
-        
-        # Create a new context
-        context = GenerationContext(
-            generation_id=task_id or str(uuid.uuid4()),
-            document_source=file_path
-        )
-        
-        # Process the document file
-        text, stats = await document_processor.process_document(
-            file_path=file_path,
-            context=context
-        )
-        
-        # Generate presentation
-        return await self.generate_presentation(
-            document_text=text,
-            options=options,
-            context=context,
             task_id=task_id,
             progress_callback=progress_callback
         )
     
     async def handle_generation_request(
-        self, 
+        self,
         request: GenerationRequest,
         task_id: Optional[str] = None
     ) -> GenerationResponse:
         """
-        Handle a presentation generation request.
+        Handle a generation request.
         
         Args:
-            request: The generation request
-            task_id: Optional task ID for tracking progress
+            request: Generation request with document text and options
+            task_id: Optional task ID for progress tracking
             
         Returns:
-            Response with the generated presentation
+            Generation response with presentation and metadata
         """
-        # Create a callback for progress updates
-        def progress_callback(progress: float, message: str) -> None:
-            if task_id:
-                update_task_progress(task_id, progress, message)
-        
         # Generate the presentation
         presentation = await self.generate_cached_presentation(
-            document_text=request.document_text,
+            text=request.document_text,
             options=request.options,
-            task_id=task_id,
-            progress_callback=progress_callback
+            task_id=task_id
         )
         
-        # Create the response
+        # Create and return the response
         return GenerationResponse(
             presentation=presentation,
             metadata={
-                "task_id": task_id,
-                "options": request.options
+                "word_count": len(request.document_text.split()),
+                "slide_count": len(presentation.slides),
+                "generated_at": datetime.now().isoformat(),
+                "task_id": task_id
             }
         )
 

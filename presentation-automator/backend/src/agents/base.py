@@ -32,7 +32,7 @@ class BaseAgent(Generic[T]):
         name: str,
         instructions: str,
         output_type: Type[T],
-        model: str = "gpt-4o-2024-05-13",
+        model: str = "gpt-4o",
         temperature: float = 0.2,
         tools: Optional[List[Any]] = None,
     ):

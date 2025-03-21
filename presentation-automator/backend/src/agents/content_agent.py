@@ -3,9 +3,9 @@ Content agent for the presentation automator.
 Generates detailed content for slides based on the presentation plan.
 """
 
-from typing import Dict, Any, Optional
+from typing import Dict, Any, List, Optional
 
-from ..models.schemas import SlideContent, SlideStructure, Presentation
+from ..models.schemas import SlideContent, SlideStructure, Presentation, PresentationPlan
 from .base import BaseAgent
 from ..utils.logging import setup_logger
 
@@ -97,4 +97,56 @@ class ContentAgent(BaseAgent[SlideContent]):
         })
         
         # Process with the agent
-        return await self.process(prompt, context) 
+        return await self.process(prompt, context)
+    
+    async def generate_slides(
+        self,
+        plan: PresentationPlan,
+        document_text: str,
+        context: Optional[Dict[str, Any]] = None
+    ) -> Presentation:
+        """
+        Generate all slides for a presentation based on the plan.
+        
+        Args:
+            plan: The presentation plan
+            document_text: The original document text
+            context: Optional context to pass to the agent
+            
+        Returns:
+            A complete presentation with slides
+        """
+        logger.info(f"Generating slides for presentation: {plan.title}")
+        
+        # Create context if not provided
+        if context is None:
+            context = {}
+        
+        # Initialize the presentation
+        presentation = Presentation(
+            title=plan.title,
+            theme=plan.theme,
+            slides=[]
+        )
+        
+        # Generate content for each slide
+        for slide_structure in plan.slides:
+            # Extract relevant content for this slide
+            # In a real implementation, you might have a more sophisticated content extractor
+            extracted_content = document_text[:500]  # Simplified for example
+            
+            # Generate slide content
+            slide_content = await self.generate_slide_content(
+                slide_structure=slide_structure,
+                extracted_content=extracted_content,
+                context=context
+            )
+            
+            # Add to presentation
+            presentation.slides.append(slide_content)
+            
+            # Log progress
+            logger.debug(f"Generated slide {slide_content.slide_number}: {slide_content.title}")
+        
+        logger.info(f"Completed generating {len(presentation.slides)} slides")
+        return presentation 
