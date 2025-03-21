@@ -1,0 +1,124 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply bg-gray-50 text-gray-900;
+}
+
+.btn {
+  @apply px-4 py-2 rounded font-medium focus:outline-none focus:ring-2 focus:ring-offset-2;
+}
+
+.btn-primary {
+  @apply bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500;
+}
+
+.btn-secondary {
+  @apply bg-gray-200 text-gray-800 hover:bg-gray-300 focus:ring-gray-500;
+}
+
+.card {
+  @apply bg-white rounded-lg shadow p-6;
+}
+
+/* Slide preview styling */
+.slide-preview {
+  min-height: 300px;
+  border: 1px solid #ddd;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.slide-preview h1, .slide-preview h2 {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+.slide-preview p {
+  margin-bottom: 1em;
+}
+
+.slide-preview ul, .slide-preview ol {
+  margin-left: 1.5em;
+  margin-bottom: 1em;
+}
+
+/* Editor styling */
+.slide-thumbnail.border-dashed {
+  border-width: 2px;
+}
+
+/* HTML content editor */
+textarea[name="content"], #html-editor {
+  font-family: monospace;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+/* Reveal.js specific styles */
+.reveal-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #000;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.reveal {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.reveal .slides {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  text-align: left;
+}
+
+.reveal .slides section {
+  padding: 20px;
+  height: 100%;
+  top: 0 !important;
+}
+
+/* Make sure slide contents are visible */
+.reveal .slides section .slide-content {
+  visibility: visible !important;
+  display: block !important;
+}
+
+/* Fix for slide images */
+.reveal .slides section img {
+  max-height: 65vh;
+  margin: 0 auto;
+  display: block;
+}
+
+/* Adjust thumbnail styling */
+.slide-thumbnails {
+  display: flex;
+  overflow-x: auto;
+  padding: 10px 0;
+  background-color: #1a1a1a;
+}
+
+.slide-thumbnail {
+  flex: 0 0 auto;
+  margin: 0 5px;
+  border: 2px solid transparent;
+  overflow: hidden;
+  position: relative;
+}
+
+.slide-thumbnail.active {
+  border-color: #2563eb;
+}
