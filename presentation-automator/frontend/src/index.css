@@ -48,77 +48,203 @@ body {
   border-width: 2px;
 }
 
-/* HTML content editor */
-textarea[name="content"], #html-editor {
-  font-family: monospace;
-  font-size: 0.9rem;
-  line-height: 1.5;
+/* HTML content editor styling */
+.html-editor {
   white-space: pre-wrap;
 }
 
-/* Reveal.js specific styles */
-.reveal-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #000;
+/* After the existing CSS, add these enhancements */
+
+/* Enhanced slide styling */
+.reveal .slides section {
+  background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.1) 100%);
+  border-radius: 10px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+  padding: 40px !important;
+}
+
+/* Better typography */
+.reveal h1 {
+  font-size: 2.6em;
+  font-weight: 700;
+  margin-bottom: 0.8em;
+  color: #3b82f6;
+  text-shadow: 0 1px 1px rgba(0,0,0,0.2);
+  letter-spacing: -0.5px;
+}
+
+.reveal h2 {
+  font-size: 1.8em;
+  font-weight: 600;
+  margin-bottom: 0.6em;
+  color: #2563eb;
+  letter-spacing: -0.3px;
+}
+
+.reveal h3 {
+  font-size: 1.4em;
+  font-weight: 600;
+  margin-bottom: 0.5em;
+  color: #4b5563;
+}
+
+.reveal p {
+  font-size: 1.1em;
+  line-height: 1.6;
+  margin-bottom: 1em;
+}
+
+/* Enhanced lists */
+.reveal ul, .reveal ol {
+  margin-left: 1.2em;
+  margin-bottom: 1.5em;
+}
+
+.reveal li {
+  margin: 0.6em 0;
+  line-height: 1.5;
+  position: relative;
+  padding-left: 0.5em;
+}
+
+.reveal ul li::before {
+  content: "•";
+  color: #3b82f6;
+  font-weight: bold;
+  display: inline-block;
+  width: 1em;
+  margin-left: -1em;
+  font-size: 1.2em;
+}
+
+/* Enhanced tables */
+.reveal table {
+  margin: 1em 0;
   width: 100%;
-  height: 100vh;
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: 8px;
   overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.reveal {
-  width: 100% !important;
-  height: 100% !important;
-  max-width: 100% !important;
-  max-height: 100% !important;
-  margin: 0 !important;
-  padding: 0 !important;
-}
-
-.reveal .slides {
-  width: 100% !important;
-  height: 100% !important;
-  max-width: 100% !important;
-  max-height: 100% !important;
+.reveal table th {
+  background-color: #2563eb;
+  color: white;
+  font-weight: 600;
+  padding: 12px 15px;
   text-align: left;
 }
 
-.reveal .slides section {
-  padding: 20px;
-  height: 100%;
-  top: 0 !important;
+.reveal table td {
+  padding: 10px 15px;
+  border-bottom: 1px solid rgba(0,0,0,0.1);
 }
 
-/* Make sure slide contents are visible */
-.reveal .slides section .slide-content {
-  visibility: visible !important;
-  display: block !important;
+.reveal table tr:last-child td {
+  border-bottom: none;
 }
 
-/* Fix for slide images */
-.reveal .slides section img {
-  max-height: 65vh;
-  margin: 0 auto;
-  display: block;
+.reveal table tr:nth-child(even) {
+  background-color: rgba(0,0,0,0.05);
 }
 
-/* Adjust thumbnail styling */
-.slide-thumbnails {
-  display: flex;
-  overflow-x: auto;
-  padding: 10px 0;
-  background-color: #1a1a1a;
+/* Enhanced code blocks */
+.reveal pre {
+  background-color: #1e293b;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 1em;
+  margin: 1em 0;
+  overflow: auto;
 }
 
-.slide-thumbnail {
-  flex: 0 0 auto;
-  margin: 0 5px;
-  border: 2px solid transparent;
-  overflow: hidden;
+.reveal pre code {
+  color: #e2e8f0;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.9em;
+  line-height: 1.5;
+}
+
+/* Blockquote styling */
+.reveal blockquote {
+  border-left: 5px solid #3b82f6;
+  background-color: rgba(59, 130, 246, 0.1);
+  padding: 15px 20px;
+  margin: 1em 0;
+  font-style: italic;
+  border-radius: 0 8px 8px 0;
   position: relative;
 }
 
-.slide-thumbnail.active {
-  border-color: #2563eb;
+.reveal blockquote::before {
+  content: "\201C";
+  font-size: 4em;
+  position: absolute;
+  left: 10px;
+  top: -10px;
+  color: rgba(59, 130, 246, 0.2);
+  font-family: serif;
+}
+
+/* Fragment animations */
+.reveal .fragment.highlight-blue.visible {
+  color: #3b82f6;
+  font-weight: bold;
+}
+
+.reveal .fragment.highlight-red.visible {
+  color: #ef4444;
+  font-weight: bold;
+}
+
+.reveal .fragment.highlight-green.visible {
+  color: #10b981;
+  font-weight: bold;
+}
+
+/* Image improvements */
+.reveal img {
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  max-height: 70vh;
+  margin: 1em auto;
+}
+
+/* Custom highlight box */
+.reveal .highlight-box {
+  background-color: rgba(59, 130, 246, 0.1);
+  border-left: 4px solid #3b82f6;
+  padding: 15px;
+  margin: 1em 0;
+  border-radius: 0 8px 8px 0;
+}
+
+/* Speaker notes improvements */
+.reveal aside.notes {
+  font-size: 0.9em;
+  line-height: 1.4;
+  padding: 15px;
+  background-color: #fffbeb;
+  border-left: 4px solid #f59e0b;
+  border-radius: 0 4px 4px 0;
+}
+
+/* Controls styling */
+.reveal .controls {
+  color: #3b82f6;
+}
+
+.reveal .progress {
+  height: 8px;
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+.reveal .progress span {
+  background-color: #3b82f6;
+}
+
+/* Slide transitions */
+.reveal.slide .slides section {
+  transition-duration: 0.8s !important;
 }
